@@ -14,7 +14,7 @@ use sqlx::sqlite::SqlitePoolOptions;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use utils::logging::{LoggingConfig, LogOutput};
 
 use crate::config::AppConfig;
 use crate::db::Database;
@@ -30,17 +30,20 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // 初始化日志
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "aicodex=debug,tower_http=debug".into()),
-        )
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+    // 加载环境变量（在日志初始化前，以便日志配置可以读取环境变量）
+    dotenvy::dotenv().ok();
+
+    // 初始化日志系统
+    let logging_config = LoggingConfig::builder()
+        .level("debug")
+        .output(LogOutput::Console)
+        .service_name("aicodex")
+        .with_env()
+        .build();
+    let _logging_guard = utils::logging::init_logging(logging_config)
+        .expect("日志系统初始化失败");
 
     // 加载配置
-    dotenvy::dotenv().ok();
     let config = AppConfig::from_env()?;
     let config = Arc::new(config);
 

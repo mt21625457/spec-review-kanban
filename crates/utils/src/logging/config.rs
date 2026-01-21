@@ -26,9 +26,11 @@ impl LogFormat {
 /// 日志输出目标
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum LogOutput {
-    /// 仅控制台输出
+    /// 仅控制台输出（stdout）
     #[default]
     Console,
+    /// 仅控制台输出（stderr，用于 MCP 等需要保留 stdout 的场景）
+    Stderr,
     /// 仅文件输出
     File,
     /// 同时输出到控制台和文件
@@ -40,6 +42,7 @@ impl LogOutput {
     pub fn from_str(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
             "console" => Some(Self::Console),
+            "stderr" => Some(Self::Stderr),
             "file" => Some(Self::File),
             "both" => Some(Self::Both),
             _ => None,
@@ -89,6 +92,12 @@ pub struct LoggingConfig {
     pub service_name: String,
     /// 是否启用 Sentry 集成
     pub enable_sentry: bool,
+    /// 是否启用 ErrorLayer（用于增强错误追踪）
+    pub enable_error_layer: bool,
+    /// 是否显示 target（模块路径）
+    pub with_target: bool,
+    /// 是否记录 span 事件（如 span 关闭）
+    pub with_span_events: bool,
 }
 
 impl Default for LoggingConfig {
@@ -103,6 +112,9 @@ impl Default for LoggingConfig {
             redact_patterns: Vec::new(),
             service_name: "app".to_string(),
             enable_sentry: false,
+            enable_error_layer: false,
+            with_target: true,
+            with_span_events: false,
         }
     }
 }
@@ -175,9 +187,14 @@ impl LoggingConfig {
         config
     }
 
-    /// 检查是否需要输出到控制台
+    /// 检查是否需要输出到控制台（stdout 或 stderr）
     pub fn should_output_console(&self) -> bool {
-        matches!(self.output, LogOutput::Console | LogOutput::Both)
+        matches!(self.output, LogOutput::Console | LogOutput::Stderr | LogOutput::Both)
+    }
+
+    /// 检查是否输出到 stderr
+    pub fn should_output_stderr(&self) -> bool {
+        matches!(self.output, LogOutput::Stderr)
     }
 
     /// 检查是否需要输出到文件
@@ -246,6 +263,24 @@ impl LoggingConfigBuilder {
         self
     }
 
+    /// 启用 ErrorLayer（用于增强错误追踪）
+    pub fn enable_error_layer(mut self, enable: bool) -> Self {
+        self.config.enable_error_layer = enable;
+        self
+    }
+
+    /// 设置是否显示 target
+    pub fn with_target(mut self, enable: bool) -> Self {
+        self.config.with_target = enable;
+        self
+    }
+
+    /// 设置是否记录 span 事件
+    pub fn with_span_events(mut self, enable: bool) -> Self {
+        self.config.with_span_events = enable;
+        self
+    }
+
     /// 添加脱敏模式
     pub fn add_redact_pattern(mut self, pattern: impl Into<String>) -> Self {
         self.config.redact_patterns.push(pattern.into());
@@ -299,6 +334,9 @@ mod tests {
         assert_eq!(config.format, LogFormat::Pretty);
         assert_eq!(config.output, LogOutput::Console);
         assert_eq!(config.max_files, 7);
+        assert!(!config.enable_error_layer);
+        assert!(config.with_target);
+        assert!(!config.with_span_events);
     }
 
     #[test]
@@ -312,6 +350,7 @@ mod tests {
     #[test]
     fn test_output_parsing() {
         assert_eq!(LogOutput::from_str("console"), Some(LogOutput::Console));
+        assert_eq!(LogOutput::from_str("stderr"), Some(LogOutput::Stderr));
         assert_eq!(LogOutput::from_str("file"), Some(LogOutput::File));
         assert_eq!(LogOutput::from_str("both"), Some(LogOutput::Both));
         assert_eq!(LogOutput::from_str("invalid"), None);

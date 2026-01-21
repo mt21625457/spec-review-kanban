@@ -1,9 +1,9 @@
 use rmcp::{ServiceExt, transport::stdio};
 use server::mcp::task_server::TaskServer;
-use tracing_subscriber::{EnvFilter, prelude::*};
 use utils::{
+    logging::{LogOutput, LoggingConfig, init_logging},
     port_file::read_port_file,
-    sentry::{self as sentry_utils, SentrySource, sentry_layer},
+    sentry::{self as sentry_utils, SentrySource},
 };
 
 fn main() -> anyhow::Result<()> {
@@ -13,19 +13,23 @@ fn main() -> anyhow::Result<()> {
         .expect("Failed to install rustls crypto provider");
 
     sentry_utils::init_once(SentrySource::Mcp);
+
+    // 使用统一日志系统，输出到 stderr（stdout 用于 MCP 协议）
+    let _guard = init_logging(
+        LoggingConfig::builder()
+            .level("debug")
+            .output(LogOutput::Stderr)
+            .service_name("mcp-task-server")
+            .enable_sentry(true)
+            .with_env()
+            .build(),
+    )?;
+
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
         .unwrap()
         .block_on(async {
-            tracing_subscriber::registry()
-                .with(
-                    tracing_subscriber::fmt::layer()
-                        .with_writer(std::io::stderr)
-                        .with_filter(EnvFilter::new("debug")),
-                )
-                .with(sentry_layer())
-                .init();
 
             let version = env!("CARGO_PKG_VERSION");
             tracing::debug!("[MCP] Starting MCP task server version {version}...");

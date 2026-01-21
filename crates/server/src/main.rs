@@ -5,12 +5,12 @@ use services::services::container::ContainerService;
 use sqlx::Error as SqlxError;
 use strip_ansi_escapes::strip;
 use thiserror::Error;
-use tracing_subscriber::{EnvFilter, prelude::*};
 use utils::{
     assets::asset_dir,
     browser::open_browser,
+    logging::{LoggingConfig, LogOutput},
     port_file::write_port_file,
-    sentry::{self as sentry_utils, SentrySource, sentry_layer},
+    sentry::{self as sentry_utils, SentrySource},
 };
 
 #[derive(Debug, Error)]
@@ -32,18 +32,30 @@ async fn main() -> Result<(), VibeKanbanError> {
         .install_default()
         .expect("Failed to install rustls crypto provider");
 
+    // 初始化 Sentry
     sentry_utils::init_once(SentrySource::Backend);
 
+    // 初始化日志系统
     let log_level = std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string());
     let filter_string = format!(
         "warn,server={level},services={level},db={level},executors={level},deployment={level},local_deployment={level},utils={level}",
         level = log_level
     );
-    let env_filter = EnvFilter::try_new(filter_string).expect("Failed to create tracing filter");
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer().with_filter(env_filter))
-        .with(sentry_layer())
-        .init();
+    // 设置 RUST_LOG 以便日志系统使用细粒度配置
+    // SAFETY: 这在 main 函数开始时调用，此时没有其他线程读取此环境变量
+    unsafe {
+        std::env::set_var("RUST_LOG", &filter_string);
+    }
+
+    let logging_config = LoggingConfig::builder()
+        .level(&log_level)
+        .output(LogOutput::Console)
+        .service_name("vibe-kanban")
+        .enable_sentry(true)
+        .with_env()
+        .build();
+    let _logging_guard = utils::logging::init_logging(logging_config)
+        .expect("日志系统初始化失败");
 
     // Create asset directory if it doesn't exist
     if !asset_dir().exists() {

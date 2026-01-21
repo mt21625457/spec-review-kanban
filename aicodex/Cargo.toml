@@ -62,5 +62,8 @@ hex = "0.4"
 hmac = "0.12"
 dotenvy = "0.15"
 
+# 内部 crate
+utils = { path = "../crates/utils" }
+
 [dev-dependencies]
 tokio-test = "0.4"

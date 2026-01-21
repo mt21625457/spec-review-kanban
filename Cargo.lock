@@ -124,6 +124,7 @@ dependencies = [
  "tower-http 0.6.8",
  "tracing",
  "tracing-subscriber",
+ "utils",
  "uuid",
 ]
 
@@ -4461,7 +4462,7 @@ dependencies = [
  "tokio",
  "toml",
  "tracing",
- "tracing-subscriber",
+ "utils",
  "uuid",
 ]
 
@@ -6382,12 +6383,14 @@ dependencies = [
  "shlex",
  "similar",
  "sqlx",
+ "tempfile",
  "thiserror 2.0.17",
  "tokio",
  "tokio-stream",
  "tokio-util",
  "tracing",
  "tracing-appender",
+ "tracing-error",
  "tracing-subscriber",
  "ts-rs 11.0.1",
  "url",

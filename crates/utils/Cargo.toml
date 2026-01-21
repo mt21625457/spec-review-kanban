@@ -13,6 +13,7 @@ serde_json = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-appender = "0.2"
+tracing-error = "0.2"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
 ts-rs = { workspace = true }
@@ -36,8 +37,11 @@ dirs = "5.0"
 thiserror = { workspace = true }
 url = "2.5"
 reqwest = { workspace = true }
-sqlx = { version = "0.8.6", default-features = false, features = ["postgres", "uuid", "chrono"] }
+sqlx = { version = "0.8.6", default-features = false, features = ["postgres", "uuid", "chrono", "derive"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.55"
 windows-sys = { version = "0.61", features = ["Win32_System_Environment"] }
+
+[dev-dependencies]
+tempfile = "3"

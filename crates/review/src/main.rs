@@ -16,7 +16,7 @@ use github::{checkout_commit, clone_repo, get_pr_info, parse_pr_url};
 use indicatif::{ProgressBar, ProgressStyle};
 use tempfile::TempDir;
 use tracing::debug;
-use tracing_subscriber::EnvFilter;
+use utils::logging::{LoggingConfig, init_logging};
 
 const DEFAULT_API_URL: &str = "https://api.vibekanban.com";
 const POLL_INTERVAL: Duration = Duration::from_secs(10);
@@ -107,13 +107,15 @@ async fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    // Initialize tracing
-    let filter = if args.verbose {
-        EnvFilter::new("debug")
-    } else {
-        EnvFilter::new("warn")
-    };
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    // 使用统一日志系统，根据 verbose 参数配置日志级别
+    let level = if args.verbose { "debug" } else { "warn" };
+    let _guard = init_logging(
+        LoggingConfig::builder()
+            .level(level)
+            .service_name("review")
+            .with_env()
+            .build(),
+    )?;
 
     println!("{}", BANNER);
 
