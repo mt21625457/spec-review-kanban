@@ -1,15 +1,18 @@
 mod config;
 mod db;
 mod error;
+mod middleware;
 mod routes;
 mod services;
 
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use axum::Router;
 use sqlx::sqlite::SqlitePoolOptions;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -73,12 +76,35 @@ async fn main() -> anyhow::Result<()> {
         .allow_methods(Any)
         .allow_headers(Any);
 
+    // 配置静态文件服务（SPA 支持）
+    let static_dir = std::env::var("STATIC_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from("../aicodex-web/dist"));
+
+    let index_path = static_dir.join("index.html");
+
     // 构建路由
-    let app = Router::new()
-        .nest("/api", routes::api_routes())
-        .layer(cors)
-        .layer(TraceLayer::new_for_http())
-        .with_state(state);
+    let app = if static_dir.exists() && index_path.exists() {
+        tracing::info!("启用静态文件服务: {:?}", static_dir);
+        // 使用 SPA fallback：所有非 API 请求都回退到 index.html
+        let serve_dir = ServeDir::new(&static_dir)
+            .not_found_service(ServeFile::new(&index_path));
+
+        Router::new()
+            .nest("/api", routes::api_routes())
+            .fallback_service(serve_dir)
+            .layer(cors)
+            .layer(TraceLayer::new_for_http())
+            .with_state(state)
+    } else {
+        tracing::warn!("静态文件目录不存在: {:?}，仅提供 API 服务", static_dir);
+        tracing::warn!("请先构建前端: cd aicodex-web && pnpm run build");
+        Router::new()
+            .nest("/api", routes::api_routes())
+            .layer(cors)
+            .layer(TraceLayer::new_for_http())
+            .with_state(state)
+    };
 
     // 启动服务器
     let addr: SocketAddr = format!("{}:{}", config.host, config.port).parse()?;

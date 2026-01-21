@@ -1,0 +1,23 @@
+# Node
+node_modules/
+dist/
+
+# 环境配置
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# 日志
+*.log
+
+# 类型检查缓存
+*.tsbuildinfo

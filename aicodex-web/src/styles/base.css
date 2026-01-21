@@ -1,0 +1,153 @@
+/* CSS 变量导入必须在最前面 */
+@import './variables.css';
+
+/* Tailwind 指令 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 基础样式重置 */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: hsl(var(--bg-primary));
+    color: hsl(var(--text-normal));
+    line-height: 1.5;
+  }
+
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--bg-secondary));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border-color));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--text-low));
+  }
+}
+
+/* 组件层 */
+@layer components {
+  /* 卡片基础样式 */
+  .card {
+    @apply bg-bg-primary rounded-lg border border-border shadow-sm;
+  }
+
+  .card-header {
+    @apply px-4 py-3 border-b border-border;
+  }
+
+  .card-body {
+    @apply p-4;
+  }
+
+  .card-footer {
+    @apply px-4 py-3 border-t border-border;
+  }
+
+  /* 按钮基础样式 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-brand text-white hover:bg-brand-hover;
+  }
+
+  .btn-secondary {
+    @apply bg-bg-secondary text-text-normal hover:bg-bg-panel border border-border;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-text-normal hover:bg-bg-secondary;
+  }
+
+  .btn-danger {
+    @apply bg-error text-white hover:opacity-90;
+  }
+
+  /* 输入框基础样式 */
+  .input {
+    @apply w-full rounded-md border border-border bg-bg-primary px-3 py-2 text-sm text-text-high placeholder:text-text-low focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand transition-colors;
+  }
+
+  /* 暗色模式输入框优化 */
+  .dark .input {
+    @apply bg-bg-secondary;
+  }
+
+  /* 状态徽章 */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-pending {
+    @apply bg-warning/10 text-warning;
+  }
+
+  .badge-running {
+    @apply bg-info/10 text-info;
+  }
+
+  .badge-completed {
+    @apply bg-success/10 text-success;
+  }
+
+  .badge-failed {
+    @apply bg-error/10 text-error;
+  }
+
+  .badge-cancelled {
+    @apply bg-text-low/10 text-text-low;
+  }
+}
+
+/* 工具层 */
+@layer utilities {
+  /* 文本截断 */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* 隐藏滚动条但保持可滚动 */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

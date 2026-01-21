@@ -7,7 +7,7 @@ use axum::{
 use serde_json::json;
 
 use crate::error::ApiError;
-use crate::services::config_service::{AllSettings, GiteaSettings, QueueSettings, ReviewSettings};
+use crate::services::config_service::{GiteaSettings, QueueSettings, ReviewSettings};
 use crate::AppState;
 
 /// 获取所有配置

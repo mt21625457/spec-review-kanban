@@ -1,3 +1,22 @@
+<!-- OPENSPEC:START -->
+# OpenSpec Instructions
+
+These instructions are for AI assistants working in this project.
+
+Always open `@/openspec/AGENTS.md` when the request:
+- Mentions planning or proposals (words like proposal, spec, change, plan)
+- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
+- Sounds ambiguous and you need the authoritative spec before coding
+
+Use `@/openspec/AGENTS.md` to learn:
+- How to create and apply change proposals
+- Spec format and conventions
+- Project structure and guidelines
+
+Keep this managed block so 'openspec update' can refresh the instructions.
+
+<!-- OPENSPEC:END -->
+
 # Repository Guidelines
 
 ## Project Structure & Module Organization
@@ -44,3 +63,7 @@ Do not manually edit shared/types.ts, instead edit crates/server/src/bin/generat
 ## Security & Config Tips
 - Use `.env` for local overrides; never commit secrets. Key envs: `FRONTEND_PORT`, `BACKEND_PORT`, `HOST` 
 - Dev ports and assets are managed by `scripts/setup-dev-environment.js`.
+
+## Communication
+- 默认使用中文交流，除非用户另有说明。
+- 强制：沟通、文档、代码注释、git 提交说明一律使用中文，除非用户明确要求其他语言。

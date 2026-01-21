@@ -1,0 +1,81 @@
+/* CSS 变量定义 */
+:root {
+  /* 品牌色 - 蓝紫色 */
+  --brand: 245 82% 54%;
+  --brand-hover: 245 75% 62%;
+  --brand-light: 245 82% 95%;
+
+  /* 文本层级 */
+  --text-high: 220 13% 13%;
+  --text-normal: 220 9% 35%;
+  --text-low: 220 9% 55%;
+
+  /* 背景层级 */
+  --bg-primary: 0 0% 100%;
+  --bg-secondary: 220 14% 96%;
+  --bg-panel: 220 14% 93%;
+  --bg-hover: 220 14% 94%;
+  --bg-tertiary: 220 14% 90%;
+
+  /* 边框 */
+  --border-color: 220 13% 87%;
+  --border-focus: 245 82% 54%;
+
+  /* 语义色 */
+  --success: 142 76% 36%;
+  --warning: 38 92% 50%;
+  --error: 0 84% 60%;
+  --info: 199 89% 48%;
+
+  /* 状态色 */
+  --status-pending: 38 92% 50%;
+  --status-running: 199 89% 48%;
+  --status-completed: 142 76% 36%;
+  --status-failed: 0 84% 60%;
+  --status-cancelled: 220 9% 55%;
+
+  /* 尺寸 */
+  --navbar-height: 3.5rem;
+  --sidebar-width: 240px;
+  --border-radius: 0.5rem;
+  --border-radius-lg: 0.75rem;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* 暗色模式 */
+.dark {
+  /* 品牌色微调 */
+  --brand: 245 82% 60%;
+  --brand-hover: 245 75% 68%;
+  --brand-light: 245 40% 20%;
+
+  /* 文本层级 */
+  --text-high: 0 0% 96%;
+  --text-normal: 220 9% 75%;
+  --text-low: 220 9% 55%;
+
+  /* 背景层级 */
+  --bg-primary: 220 13% 10%;
+  --bg-secondary: 220 13% 13%;
+  --bg-panel: 220 13% 16%;
+  --bg-hover: 220 13% 18%;
+  --bg-tertiary: 220 13% 20%;
+
+  /* 边框 */
+  --border-color: 220 13% 23%;
+
+  /* 语义色微调（暗色模式下稍微亮一点） */
+  --success: 142 70% 45%;
+  --warning: 38 92% 55%;
+  --error: 0 80% 65%;
+  --info: 199 85% 55%;
+
+  /* 阴影（暗色模式使用更强的阴影） */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+}

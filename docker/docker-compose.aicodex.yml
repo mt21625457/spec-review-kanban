@@ -1,0 +1,68 @@
+# AICodex 多实例管理部署配置
+# 包含 aicodex、aicodex-web 和 nginx 反向代理
+# vibe-kanban 实例由 aicodex 动态管理
+
+version: '3.8'
+
+services:
+  # 反向代理
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./nginx.aicodex.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - aicodex
+      - aicodex-web
+    restart: unless-stopped
+    networks:
+      - aicodex-network
+
+  # aicodex 后端服务 (含多实例管理)
+  aicodex:
+    build:
+      context: ../aicodex
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=sqlite:///data/aicodex.db?mode=rwc
+      - VIBE_KANBAN_BIN=/usr/local/bin/vibe-kanban
+      - VIBE_INSTANCES_DATA_ROOT=/data/vibe-instances
+      - VIBE_INSTANCES_PORT_BASE=18100
+      - VIBE_INSTANCES_PORT_MAX=18199
+      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - SESSION_TTL_SECS=${SESSION_TTL_SECS:-86400}
+      - CONFIG_ENCRYPTION_KEY=${CONFIG_ENCRYPTION_KEY:-}
+      - GITEA_WEBHOOK_SECRET=${GITEA_WEBHOOK_SECRET:-}
+      - HOST=0.0.0.0
+      - PORT=8080
+    volumes:
+      - aicodex-data:/data
+      - vibe-instances:/data/vibe-instances
+      - ${REPOS_PATH:-/repos}:/repos:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - aicodex-network
+
+  # aicodex 前端
+  aicodex-web:
+    build:
+      context: ../aicodex-web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - aicodex-network
+
+networks:
+  aicodex-network:
+    driver: bridge
+
+volumes:
+  aicodex-data:
+  vibe-instances:
